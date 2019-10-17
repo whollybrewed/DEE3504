@@ -10,7 +10,7 @@ struct Node{
 };
 
 int find_longest_chain(Node *tree, int id);
-
+const std::size_t found = std::string::npos;
 std::string vowels = "aeiou";
 int long_chain = 0;
 int main(int argc, char* argv[])
@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 		fin >> alphabet_tree[tmp_id].letter;
 		fin >> alphabet_tree[tmp_id].left;
 		fin >> alphabet_tree[tmp_id].right;
-			
+
 	}
 	fin.close(); 
 	find_longest_chain(alphabet_tree, num_of_nodes);
@@ -36,26 +36,34 @@ int main(int argc, char* argv[])
 }
 
 int find_longest_chain(Node *tree, int id)
-{
-	if (tree[id].left + tree[id].right == 0){ 
-		if (vowels.find(tree[id].letter) != std::string::npos){
-			return 1;
-		}
+{	if (id == 0){ 
+		return 0;
 	}
-	else{	
-		int left_chain = 0;
-		int right_chain = 0;
-		int new_left_chain = 0;
-		int new_right_chain = 0;
-		if (tree[id].left != 0)
-			left_chain = find_longest_chain(tree, tree[id].left);
-		if (tree[id].right != 0)
-			 right_chain = find_longest_chain(tree, tree[id].right);
-		if (vowels.find(tree[id].letter) != std::string::npos){
-			new_left_chain = left_chain + 1;
-			new_right_chain = right_chain + 1;
+	int id_left = tree[id].left;
+	int id_right = tree[id].right;
+	
+	int new_left_chain = 0;
+	int new_right_chain = 0;
+
+	int left_chain = find_longest_chain(tree, id_left);
+	int right_chain = find_longest_chain(tree, id_right);
+
+	if (id_left != 0){
+		if (vowels.find(tree[id].letter) != found
+		    &&
+		    vowels.find(tree[id_left].letter) != found){
+			new_left_chain += left_chain + 1;
 		}
-		long_chain = std::max(long_chain, new_left_chain + new_right_chain - 2);
-		return std::max(new_left_chain, new_right_chain);
+
 	}
+	if (id_right != 0){
+		if (vowels.find(tree[id].letter) != found
+		    &&
+		    vowels.find(tree[id_right].letter) != found){
+			new_right_chain += right_chain + 1;
+		}
+
+	}
+	long_chain = std::max(long_chain, new_left_chain + new_right_chain);
+	return std::max(new_left_chain, new_right_chain);
 }
