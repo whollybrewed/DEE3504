@@ -9,12 +9,17 @@ struct Node{
 	int left;
 	int right;
 };
+
 int find_longest_chain(Node *tree, std::vector<std::vector<int> > &table, int id);
 void print_result(int mode, char* output_name);
+
 const std::size_t unfound = std::string::npos;
 std::string vowels = "aeiou";
+// length of the longest chain
 int long_chain = 0;
+// to store all elements in the longest chain
 std::vector<int> result_chain;
+
 int main(int argc, char* argv[])
 {
 	std::ifstream fin;
@@ -22,7 +27,9 @@ int main(int argc, char* argv[])
 	fin.open(argv[1]);	 
 	fin >> num_of_nodes;
 	fin >> mode;
+	// array[0] is unused
 	Node alphabet_tree[num_of_nodes + 1];
+	// to store chain elements for each node. vector[0][] is unused
 	std::vector<std::vector<int> > chain_table(num_of_nodes + 1);
 	for (int i = 1; i <= num_of_nodes; i++){
 		int tmp_id = 0;
@@ -39,13 +46,15 @@ int main(int argc, char* argv[])
 }
 
 int find_longest_chain(Node *tree, std::vector<std::vector<int> > &table, int id)
-{	if (id == 0){ 
+{	
+	// base condition
+	if (id == 0){ 
 		return 0;
 	}
 	std::vector<int> left_result;
 	std::vector<int> right_result;
 	std::vector<int> right_result_reverse;
-
+	
 	int id_left = tree[id].left;
 	int id_right = tree[id].right;
 	
@@ -54,7 +63,8 @@ int find_longest_chain(Node *tree, std::vector<std::vector<int> > &table, int id
 	
 	int left_chain = find_longest_chain(tree, table, id_left);
 	int right_chain = find_longest_chain(tree, table, id_right);
-
+	
+	// if both left child and parent are vowels
 	if (id_left != 0){
 		if (vowels.find(tree[id].letter) != unfound
 		    &&
@@ -63,6 +73,7 @@ int find_longest_chain(Node *tree, std::vector<std::vector<int> > &table, int id
 			left_result = table[id_left];
 		}
 	}
+	// if both right child and parent are vowels
 	if (id_right != 0){
 		if (vowels.find(tree[id].letter) != unfound
 		    &&
@@ -71,18 +82,18 @@ int find_longest_chain(Node *tree, std::vector<std::vector<int> > &table, int id
 			right_result = table[id_right];
 		}
 	}
+	// longest chain = max(straight chain, folded chain) 
 	if (new_left_chain + new_right_chain > long_chain){
 		result_chain.clear();
 		result_chain.insert(result_chain.begin(), left_result.begin(), left_result.end());
 		result_chain.push_back(id);
 		right_result_reverse = right_result;
+		// turn the right straight chain around and then join the left chain to form a folded chain
 		std::reverse(right_result_reverse.begin(),right_result_reverse.end());
-		result_chain.insert(result_chain.end(), right_result_reverse.begin(), right_result_reverse.end());	
+		result_chain.insert(result_chain.end(), right_result_reverse.begin(), right_result_reverse.end());
+		long_chain = new_left_chain + new_right_chain;	
 	}
 	
-
-	long_chain = std::max(long_chain, new_left_chain + new_right_chain);
-
 	if (new_left_chain > new_right_chain){
 		table[id].clear();
 		if (vowels.find(tree[id].letter) != unfound){
@@ -98,8 +109,7 @@ int find_longest_chain(Node *tree, std::vector<std::vector<int> > &table, int id
 			table[id] = right_result;
 			table[id].push_back(id);
 		}
-		return new_right_chain;
-		
+		return new_right_chain;	
 	}
 }
 
