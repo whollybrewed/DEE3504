@@ -1,14 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm> 
-#include <cstring> 
 
 struct CorpInfo{
 	int area;
 	int value;
 };
 
-int recur(CorpInfo *corp, int remain);
+int recur(CorpInfo *corp, int remain, int type);
 int dynamic(CorpInfo *corp, int field_area);
 int memo(CorpInfo *corp, int remain, int *cache);
 
@@ -29,14 +28,16 @@ int main(int argc, char* argv[])
 	}
 	fin.close();
 	if (mode == 0){
-		result = recur(corp, field_area);
+		result = recur(corp, field_area, num_corp);
 	}
 	else if (mode == 1){
 		result = dynamic(corp, field_area);
 	}
 	else if (mode == 2){
 		int cache[field_area + 1];
-		std::memset(cache, -1, sizeof(cache));
+		for (int i = 0; i < field_area + 1; i++){
+			cache[i] = -1;
+		} 
 		result = memo(corp, field_area, cache);
 	}
 	std::ofstream fout;
@@ -46,24 +47,30 @@ int main(int argc, char* argv[])
 	return 0; 
 }
 
-int recur(CorpInfo *corp, int remain)
+int recur(CorpInfo *corp, int remain, int type)
 {
-	int highest_val = 0, tmp_val, new_remain;
-	for (int i = 0; i < num_corp; i++){
-		new_remain = remain - corp[i].area;
-		if (new_remain < 0){ 
-			continue;
-		}
-		tmp_val = corp[i].value + recur(corp, new_remain);
-		highest_val = std::max(highest_val, tmp_val);
-	}
-	return highest_val;
+    int highest_val = 0, new_remain, val_choose, val_not_choose;
+    if (remain < 0 || type < 0){
+        return 0;
+    }
+    if (remain < corp[type].area){
+        highest_val = recur(corp, remain, type - 1);
+    }
+    else{
+        new_remain = remain - corp[type].area;
+        val_choose = corp[type].value + recur(corp, new_remain, type);
+        val_not_choose = recur(corp, remain, type - 1);
+        highest_val = std::max(val_choose, val_not_choose);
+    }
+    return highest_val;
 }
 
 int dynamic(CorpInfo *corp, int field_area)
 {
 	int field_best[field_area + 1];
-	std::memset(field_best, 0, sizeof(field_best));
+	for (int i = 0; i < field_area + 1; i++){
+		field_best[i] = 0;
+	} 
 	int tmp_val;
 	for (int tmp_area = 0; tmp_area < field_area + 1; tmp_area++){
 		for (int i = 0; i < num_corp; i++){
