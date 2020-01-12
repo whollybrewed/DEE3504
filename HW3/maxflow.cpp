@@ -123,8 +123,17 @@ int main(int argc, char* argv[])
 		else if (line == 6){
 			istringstream token(str);
 			int key;
-			while(token >> key)
-				NodeCaps.push_back(key);
+			string key_str;
+			for (int i = 0; i < num_place; i++){
+				token >> key_str;
+				if(key_str == "Inf"){
+					NodeCaps.push_back(INF);
+				}
+				else{
+					istringstream(key_str) >> key;
+					NodeCaps.push_back(key);
+				}
+			}
 		}
 		else if (line == 7){
 			break;
@@ -159,6 +168,15 @@ int main(int argc, char* argv[])
 	fout.open(argv[2]);	
 	fout << edmons_karp(graph, 0, sink - 1);
 	fout.close(); 
+	
+	/*
+	for(int i = 0; i < num_V; i++){
+		for(int j = 0; j < num_V; j++){
+			cout << graph[i][j] << " ";
+	   }
+		cout << endl;
+	}
+	*/
 
 	//cout << "maxflow = " << edmons_karp(graph, 0, sink - 1) << endl;
 
